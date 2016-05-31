@@ -1,3 +1,4 @@
+#include <QObject>
 #include <QtWidgets>
 #include <QDialog>
 
@@ -10,6 +11,10 @@ class MainWindow;
 
 //Dialogs
 class AboutDialog;
-class ModuleDialog;
 class OptionsDialog;
 class ProcessDialog;
+
+//Managers
+class MemoryManager;
+class InternalMemoryManager;
+class ExternalMemoryManager;

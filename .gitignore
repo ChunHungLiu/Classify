@@ -28,7 +28,7 @@
 *.app
 
 #MSVC Database
-*.VC.db
+*.db
 
 #PCH
 ipch
@@ -39,3 +39,6 @@ x64
 Classify/Debug
 Classify/x64
 Classify/GeneratedFiles
+
+#Visual Studio configuration
+.vs

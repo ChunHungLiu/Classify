@@ -2,7 +2,7 @@
 #include "mainwindow.hpp"
 #include <QtWidgets/QApplication>
 
-#if _DEBUG
+#if defined(_DEBUG) || defined(Q_CC_MSVC)
 #include <vld.h>
 #endif
 

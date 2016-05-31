@@ -10,57 +10,14 @@ ProcessDialog::ProcessDialog(QWidget * parent)
 	: QDialog(parent) {
 	setWindowTitle(tr("Select Process"));
 
-	//Initializing layout
-	_mainLayout = new QVBoxLayout;
-	_topLayout = new QHBoxLayout;
-	_bottomLayout = new QHBoxLayout;
-	
-	//Initializing controls
-	_processListView = new QListView;
-	_searchEdit = new QLineEdit;
-	_refreshButton = new QToolButton;
-	_openButton = new QToolButton;
+	initializeObjects();
 
-	//Initializing models
-	_proxyModel = new QSortFilterProxyModel(this);
-	_listModel = new QStandardItemModel(_proxyModel);
+	initializeLayouts();
+	initializeControls();
+	initializeModels();
+	initializeConnects();
 
-	//Setup icons
-	_refreshButton->setIcon(QIcon(":/Refresh"));
-	_openButton->setIcon(QIcon(":/Ok"));
-
-	//Setup text
-	_openButton->setText(tr("Open"));
-	_searchEdit->setPlaceholderText(tr("Search..."));
-
-	//Setup layout settings
-	_mainLayout->setSpacing(6);
-	_topLayout->setSpacing(6);
-	_bottomLayout->setSpacing(6);
-
-	_mainLayout->setContentsMargins(9, 9, 9, 9);
-	_topLayout->setContentsMargins(0, 0, 0, 0);
-	_bottomLayout->setContentsMargins(0, 0, 0, 0);
-
-	//Adding items and widgets
-	_topLayout->addWidget(new QLabel(tr("Processes"), this));
-	_topLayout->addItem(new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum));
-	_topLayout->addWidget(_searchEdit);
-	_topLayout->addWidget(_refreshButton);
-	_bottomLayout->addItem(new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum));
-	_bottomLayout->addWidget(_openButton);
-
-	//Configure models
-	_proxyModel->setSourceModel(_listModel);
-	_proxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
-	_processListView->setModel(_proxyModel);
-	_selectionModel = _processListView->selectionModel();
-	_processListView->setEditTriggers(QAbstractItemView::NoEditTriggers);
-
-	//Prepare main layout
-	_mainLayout->addLayout(_topLayout);
-	_mainLayout->addWidget(_processListView);
-	_mainLayout->addLayout(_bottomLayout);
+	prepareLayout();
 
 	//Set main layout
 	setLayout(_mainLayout);
@@ -74,8 +31,64 @@ ProcessDialog::ProcessDialog(QWidget * parent)
 	GetNativeSystemInfo(&info);
 	_isOs64bit = (info.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64);
 	#endif
-	
-	//Connects
+}
+
+void ProcessDialog::initializeObjects() {
+	_mainLayout = new QVBoxLayout;
+	_topLayout = new QHBoxLayout;
+	_bottomLayout = new QHBoxLayout;
+
+	_proxyModel = new QSortFilterProxyModel(this);
+	_listModel = new QStandardItemModel(_proxyModel);
+
+	_processListView = new QListView;
+	_searchEdit = new QLineEdit;
+	_refreshButton = new QToolButton;
+	_openButton = new QToolButton;
+}
+
+void ProcessDialog::initializeLayouts() {
+	_mainLayout->setSpacing(6);
+	_topLayout->setSpacing(6);
+	_bottomLayout->setSpacing(6);
+
+	_mainLayout->setContentsMargins(9, 9, 9, 9);
+	_topLayout->setContentsMargins(0, 0, 0, 0);
+	_bottomLayout->setContentsMargins(0, 0, 0, 0);
+
+	_mainLayout->addLayout(_topLayout);
+	_mainLayout->addWidget(_processListView);
+	_mainLayout->addLayout(_bottomLayout);
+}
+
+void ProcessDialog::initializeControls() {
+	//Setup icons
+	_refreshButton->setIcon(QIcon(":/Refresh"));
+	_openButton->setIcon(QIcon(":/Ok"));
+
+	//Setup text
+	_openButton->setText(tr("Open"));
+	_searchEdit->setPlaceholderText(tr("Search..."));
+}
+
+void ProcessDialog::prepareLayout() {
+	_topLayout->addWidget(new QLabel(tr("Processes"), this));
+	_topLayout->addItem(new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum));
+	_topLayout->addWidget(_searchEdit);
+	_topLayout->addWidget(_refreshButton);
+	_bottomLayout->addItem(new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum));
+	_bottomLayout->addWidget(_openButton);
+}
+
+void ProcessDialog::initializeModels() {
+	_proxyModel->setSourceModel(_listModel);
+	_proxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
+	_processListView->setModel(_proxyModel);
+	_selectionModel = _processListView->selectionModel();
+	_processListView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+}
+
+void ProcessDialog::initializeConnects() {
 	connect(_searchEdit, &QLineEdit::textEdited, this, &ProcessDialog::onSearchTextEdited);
 	connect(_refreshButton, &QToolButton::released, this, &ProcessDialog::onRefreshButtonReleased);
 	connect(_openButton, &QToolButton::released, this, &ProcessDialog::onOpenProcessReleased);

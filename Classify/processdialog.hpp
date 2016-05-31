@@ -15,10 +15,15 @@ public:
 	bool isSelected();
 	const Process getSelectedProcess() const { return _selectedProcess; }
 	~ProcessDialog();
-/*
 
-signals:
-	void processSelected(const Process& process);*/
+private:
+	void initializeObjects();
+	void initializeLayouts();
+	void initializeControls();
+	void initializeModels();
+	void initializeConnects();
+
+	void prepareLayout();
 
 private slots:
 	void onRefreshButtonReleased();

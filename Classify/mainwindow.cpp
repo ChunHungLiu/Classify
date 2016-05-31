@@ -6,15 +6,36 @@
 MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow(parent) {
 
-	//Initialize dialogs
-	_processDialog = new ProcessDialog(this);
+	initializeObjects();
 
-	//Initialize Toolbars
+	initializeLayouts();
+	initializeControls();
+	initializeModels();
+	initializeConnects();
+
+	prepareLayout();
+
+	//Setup
+	addToolBar(Qt::RightToolBarArea, _dataTypesToolBar);
+	statusBar()->showMessage(tr("Ready"));
+	_filters.push_back("Classif Project (*.clp)");
+	_filters.push_back("All files (*.*)");
+
+}
+
+void MainWindow::initializeObjects() {
+	_processDialog = new ProcessDialog(this);
 	_mainToolBar = addToolBar(tr("Main Toolbar"));
 	_dataTypesToolBar = new QToolBar(tr("Data Types Toolbar"), this);
-
-	//Initialize MenuBars
 	_menuBar = menuBar();
+
+}
+
+void MainWindow::initializeLayouts() {
+	//TODO: Add layouts
+}
+
+void MainWindow::initializeControls() {
 	_fileMenu = _menuBar->addMenu(tr("&File"));
 	_toolMenu = _menuBar->addMenu(tr("&Tools"));
 	_helpMenu = _menuBar->addMenu(tr("&Help"));
@@ -93,18 +114,17 @@ MainWindow::MainWindow(QWidget *parent)
 	_helpMenu->addAction(_checkUpdatesAction);
 	_helpMenu->addSeparator();
 	_helpMenu->addAction(_aboutAction);
+}
 
-	//Settings
-	addToolBar(Qt::RightToolBarArea, _dataTypesToolBar);
-	statusBar()->showMessage(tr("Ready"));
-	_filters.push_back("Classif Project (*.clp)");
-	_filters.push_back("All files (*.*)");
+void MainWindow::initializeModels() {
+	//TODO: Add models
+}
 
-	//Connects
+void MainWindow::initializeConnects() {
 	connect(_undoAction, &QAction::triggered, this, &MainWindow::onUndoAction);
 	connect(_createNamespaceAction, &QAction::triggered, this, &MainWindow::onCreateNamespaceAction);
 	connect(_createClassAction, &QAction::triggered, this, &MainWindow::onCreateClassAction);
-	for(QAction *action : _dataTypeActionList)
+	for (QAction *action : _dataTypeActionList)
 		connect(action, &QAction::triggered, this, &MainWindow::onConvertAction);
 	connect(_selectProcessAction, &QAction::triggered, this, &MainWindow::onSelectProcessAction);
 	connect(_newProjectAction, &QAction::triggered, this, &MainWindow::onNewProjectAction);
@@ -116,6 +136,10 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(_optionsAction, &QAction::triggered, this, &MainWindow::onOptionsAction);
 	connect(_checkUpdatesAction, &QAction::triggered, this, &MainWindow::onCheckUpdatesAction);
 	connect(_aboutAction, &QAction::triggered, this, &MainWindow::onAboutAction);
+}
+
+void MainWindow::prepareLayout() {
+	//TODO: Prepare layout to show
 }
 
 void MainWindow::onAboutAction() {
@@ -135,9 +159,9 @@ void MainWindow::onSelectProcessAction() {
 		return;
 	}
 
-	setWindowTitle(tr("Application"));
-	//setWindowTitle(tr("%1 - %2").arg(windowTitle(), proc.name)); //TODO: HARDCODED
 
+
+	setWindowTitle(tr("Classify - %1").arg(windowTitle(), proc.name));
 	CloseHandle(_hSelectedProcess);
 }
 

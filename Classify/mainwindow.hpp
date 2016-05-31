@@ -11,6 +11,15 @@ public:
 	MainWindow(QWidget *parent = Q_NULLPTR);
 	~MainWindow();
 
+private:
+	void initializeObjects();
+	void initializeLayouts();
+	void initializeControls();
+	void initializeModels();
+	void initializeConnects();
+
+	void prepareLayout();
+
 private slots:
 	void onSaveAction();
 	void onSaveAsAction();
