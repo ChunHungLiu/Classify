@@ -18,3 +18,8 @@ class ProcessDialog;
 class MemoryManager;
 class InternalMemoryManager;
 class ExternalMemoryManager;
+
+//Models
+class MemoryTreeViewModel;
+
+class ClassNode;

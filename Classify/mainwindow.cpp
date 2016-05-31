@@ -3,17 +3,18 @@
 #include "aboutdialog.hpp"
 #include "processdialog.hpp"
 
+#include "externalmemorymanager.hpp"
+#include "memorytreeviewmodel.hpp"
+
 MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow(parent) {
 
 	initializeObjects();
 
-	initializeLayouts();
-	initializeControls();
-	initializeModels();
-	initializeConnects();
-
-	prepareLayout();
+	prepareLayouts();
+	prepareControls();
+	prepareModels();
+	prepareConnects();
 
 	//Setup
 	addToolBar(Qt::RightToolBarArea, _dataTypesToolBar);
@@ -24,18 +25,21 @@ MainWindow::MainWindow(QWidget *parent)
 }
 
 void MainWindow::initializeObjects() {
+	_memoryManager = new ExternalMemoryManager(this);
 	_processDialog = new ProcessDialog(this);
-	_mainToolBar = addToolBar(tr("Main Toolbar"));
+
 	_dataTypesToolBar = new QToolBar(tr("Data Types Toolbar"), this);
+	_projectDockWidget = new QDockWidget(tr("Project"), this);
+
+	_projectTreeView = new QTreeView(_projectDockWidget);
+	_projectTreeViewModel = new QStandardItemModel(this);
+
+	_memoryTreeView = new QTreeView(this);
+	_memoryTreeViewModel = new MemoryTreeViewModel(this);
+
+	_mainToolBar = addToolBar(tr("Main Toolbar"));
 	_menuBar = menuBar();
 
-}
-
-void MainWindow::initializeLayouts() {
-	//TODO: Add layouts
-}
-
-void MainWindow::initializeControls() {
 	_fileMenu = _menuBar->addMenu(tr("&File"));
 	_toolMenu = _menuBar->addMenu(tr("&Tools"));
 	_helpMenu = _menuBar->addMenu(tr("&Help"));
@@ -56,7 +60,15 @@ void MainWindow::initializeControls() {
 	_optionsAction = new QAction(QIcon(":/Options"), tr("&Options"), _toolMenu);
 	_checkUpdatesAction = new QAction(QIcon(":/CheckUpdates"), tr("&Check updates"), _helpMenu);
 	_aboutAction = new QAction(QIcon(":/About"), tr("&About"), _helpMenu);
+}
 
+void MainWindow::prepareLayouts() {
+	setCentralWidget(_memoryTreeView);
+
+	addDockWidget(Qt::LeftDockWidgetArea, _projectDockWidget);
+}
+
+void MainWindow::prepareControls() {
 	//Create items in toolbars
 	_mainToolBar->addAction(_selectProcessAction);
 	_mainToolBar->addSeparator();
@@ -114,13 +126,23 @@ void MainWindow::initializeControls() {
 	_helpMenu->addAction(_checkUpdatesAction);
 	_helpMenu->addSeparator();
 	_helpMenu->addAction(_aboutAction);
+
+	_projectDockWidget->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+	_projectDockWidget->setWidget(_projectTreeView);
 }
 
-void MainWindow::initializeModels() {
-	//TODO: Add models
+void MainWindow::prepareModels() {
+	_projectTreeViewModel->setColumnCount(1);
+	_projectTreeViewModel->setHorizontalHeaderLabels({ "Object name" });
+
+	_projectTreeView->setModel(_projectTreeViewModel);
+	_projectTreeViewSelectionModel = _projectTreeView->selectionModel();
+
+	//test
+	_projectTreeViewModel->invisibleRootItem()->appendRow(new QStandardItem(QIcon(":/CreateClass"), tr("Test")));
 }
 
-void MainWindow::initializeConnects() {
+void MainWindow::prepareConnects() {
 	connect(_undoAction, &QAction::triggered, this, &MainWindow::onUndoAction);
 	connect(_createNamespaceAction, &QAction::triggered, this, &MainWindow::onCreateNamespaceAction);
 	connect(_createClassAction, &QAction::triggered, this, &MainWindow::onCreateClassAction);
@@ -138,10 +160,6 @@ void MainWindow::initializeConnects() {
 	connect(_aboutAction, &QAction::triggered, this, &MainWindow::onAboutAction);
 }
 
-void MainWindow::prepareLayout() {
-	//TODO: Prepare layout to show
-}
-
 void MainWindow::onAboutAction() {
 	AboutDialog about(this);
 	about.exec();
@@ -153,16 +171,12 @@ void MainWindow::onSelectProcessAction() {
 
 	const Process proc = _processDialog->getSelectedProcess();
 
-	_hSelectedProcess = OpenProcess(PROCESS_ALL_ACCESS, FALSE, proc.id);
-	if (_hSelectedProcess == NULL) {
+	if (!_memoryManager->openProcess(proc.id)) {
 		QMessageBox::warning(this, tr("Application"), tr("Can't open handle to process %1").arg(proc.name));
 		return;
 	}
 
-
-
-	setWindowTitle(tr("Classify - %1").arg(windowTitle(), proc.name));
-	CloseHandle(_hSelectedProcess);
+	setWindowTitle(tr("Classify - %1").arg(proc.name));
 }
 
 void MainWindow::onUndoAction() {
@@ -189,11 +203,18 @@ void MainWindow::onCheckUpdatesAction() {
 }
 
 void MainWindow::onCreateClassAction() {
+	QStandardItem *item = new QStandardItem(QIcon(":/CreateClass"), tr("NewClass"));
+	QStandardItem *node = Q_NULLPTR;
 
+	if (!_projectTreeViewSelectionModel->hasSelection())
+		node = _projectTreeViewModel->invisibleRootItem();
+	else
+		node = _projectTreeViewModel->itemFromIndex(_projectTreeViewSelectionModel->currentIndex());
+
+	node->appendRow(item);
 }
 
 void MainWindow::onOpenProjectAction() {
-
 }
 
 void MainWindow::onOptionsAction() {
@@ -208,7 +229,7 @@ void MainWindow::onImportAction() {
 }
 
 void MainWindow::onCreateNamespaceAction() {
-
+	_projectTreeViewModel->invisibleRootItem()->appendRow(new QStandardItem(QIcon(":/CreateNamespace"), tr("NewNamespace")));
 }
 
 MainWindow::~MainWindow() {

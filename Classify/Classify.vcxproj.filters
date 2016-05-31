@@ -94,6 +94,15 @@
     <ClCompile Include="GeneratedFiles\Release\moc_externalmemorymanager.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="memorytreeviewmodel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_memorytreeviewmodel.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_memorytreeviewmodel.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -120,6 +129,9 @@
       <Filter>Resource Files</Filter>
     </CustomBuild>
     <CustomBuild Include="externalmemorymanager.hpp">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="memorytreeviewmodel.hpp">
       <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>

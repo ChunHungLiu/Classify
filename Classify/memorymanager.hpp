@@ -7,8 +7,10 @@ class MemoryManager {
 	friend class InternalMemoryManager;
 	friend class ExternalMemoryManager;
 
+	virtual void closeProcess() = 0;
 public:
 	//Virtuals
+	virtual bool openProcess(quint64 id) = 0;
 	virtual void read(const quintptr address, void* buffer, size_t size) = 0;
 	virtual void write(quintptr address, const void* buffer, size_t size) = 0;
 

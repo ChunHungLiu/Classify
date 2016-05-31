@@ -12,12 +12,10 @@ ProcessDialog::ProcessDialog(QWidget * parent)
 
 	initializeObjects();
 
-	initializeLayouts();
-	initializeControls();
-	initializeModels();
-	initializeConnects();
-
-	prepareLayout();
+	prepareLayouts();
+	prepareControls();
+	prepareModels();
+	prepareConnects();
 
 	//Set main layout
 	setLayout(_mainLayout);
@@ -38,8 +36,8 @@ void ProcessDialog::initializeObjects() {
 	_topLayout = new QHBoxLayout;
 	_bottomLayout = new QHBoxLayout;
 
-	_proxyModel = new QSortFilterProxyModel(this);
-	_listModel = new QStandardItemModel(_proxyModel);
+	_processListViewProxyModel = new QSortFilterProxyModel(this);
+	_listModel = new QStandardItemModel(_processListViewProxyModel);
 
 	_processListView = new QListView;
 	_searchEdit = new QLineEdit;
@@ -47,7 +45,7 @@ void ProcessDialog::initializeObjects() {
 	_openButton = new QToolButton;
 }
 
-void ProcessDialog::initializeLayouts() {
+void ProcessDialog::prepareLayouts() {
 	_mainLayout->setSpacing(6);
 	_topLayout->setSpacing(6);
 	_bottomLayout->setSpacing(6);
@@ -56,12 +54,19 @@ void ProcessDialog::initializeLayouts() {
 	_topLayout->setContentsMargins(0, 0, 0, 0);
 	_bottomLayout->setContentsMargins(0, 0, 0, 0);
 
+	_topLayout->addWidget(new QLabel(tr("Processes"), this));
+	_topLayout->addItem(new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum));
+	_topLayout->addWidget(_searchEdit);
+	_topLayout->addWidget(_refreshButton);
+	_bottomLayout->addItem(new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum));
+	_bottomLayout->addWidget(_openButton);
+
 	_mainLayout->addLayout(_topLayout);
 	_mainLayout->addWidget(_processListView);
 	_mainLayout->addLayout(_bottomLayout);
 }
 
-void ProcessDialog::initializeControls() {
+void ProcessDialog::prepareControls() {
 	//Setup icons
 	_refreshButton->setIcon(QIcon(":/Refresh"));
 	_openButton->setIcon(QIcon(":/Ok"));
@@ -71,31 +76,21 @@ void ProcessDialog::initializeControls() {
 	_searchEdit->setPlaceholderText(tr("Search..."));
 }
 
-void ProcessDialog::prepareLayout() {
-	_topLayout->addWidget(new QLabel(tr("Processes"), this));
-	_topLayout->addItem(new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum));
-	_topLayout->addWidget(_searchEdit);
-	_topLayout->addWidget(_refreshButton);
-	_bottomLayout->addItem(new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum));
-	_bottomLayout->addWidget(_openButton);
+void ProcessDialog::prepareModels() {
+	_processListViewProxyModel->setSourceModel(_listModel);
+	_processListViewProxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
+	_processListView->setModel(_processListViewProxyModel);
+	_processListViewSelectionModel = _processListView->selectionModel();
 }
 
-void ProcessDialog::initializeModels() {
-	_proxyModel->setSourceModel(_listModel);
-	_proxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
-	_processListView->setModel(_proxyModel);
-	_selectionModel = _processListView->selectionModel();
-	_processListView->setEditTriggers(QAbstractItemView::NoEditTriggers);
-}
-
-void ProcessDialog::initializeConnects() {
+void ProcessDialog::prepareConnects() {
 	connect(_searchEdit, &QLineEdit::textEdited, this, &ProcessDialog::onSearchTextEdited);
 	connect(_refreshButton, &QToolButton::released, this, &ProcessDialog::onRefreshButtonReleased);
 	connect(_openButton, &QToolButton::released, this, &ProcessDialog::onOpenProcessReleased);
 }
 
 bool ProcessDialog::isSelected() {
-	if (!_selectionModel->hasSelection()) {
+	if (!_processListViewSelectionModel->hasSelection()) {
 		QMessageBox::warning(this, tr("Failed"), tr("Select process first"));
 		return false;
 	}
@@ -153,7 +148,7 @@ void ProcessDialog::showEvent(QShowEvent *event) {
 }
 
 void ProcessDialog::onSearchTextEdited(QString str) {
-	_proxyModel->setFilterWildcard(QString("%1").arg(str));
+	_processListViewProxyModel->setFilterWildcard(QString("%1").arg(str));
 }
 
 void ProcessDialog::onOpenProcessReleased() {
@@ -161,7 +156,7 @@ void ProcessDialog::onOpenProcessReleased() {
 		return;
 
 	auto proc = std::find_if(_processList.cbegin(), _processList.cend(), [=](const Process& p) {
-		return p.name.compare(_selectionModel->selectedRows().first().data().toString(), Qt::CaseInsensitive); 
+		return p.name.compare(_processListViewSelectionModel->selectedRows().first().data().toString(), Qt::CaseInsensitive); 
 	});
 	Q_ASSERT(proc != Q_NULLPTR);
 

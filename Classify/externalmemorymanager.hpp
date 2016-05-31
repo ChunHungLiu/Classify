@@ -13,11 +13,17 @@ class ExternalMemoryManager : public QObject, public MemoryManager {
 		return handle != NULL && handle != INVALID_HANDLE_VALUE;
 	}
 	#endif
+
+	bool _processOpened;
 public:
-	ExternalMemoryManager(quint64 processId, QObject * parent = Q_NULLPTR);
+	ExternalMemoryManager(QObject * parent = Q_NULLPTR);
+	bool openProcess(quint64 processId) override;
 	void read(const quintptr address, void* buffer, size_t size) override;
 	void write(quintptr address, const void* buffer, size_t size) override;
 	~ExternalMemoryManager();
+
+private:
+	void closeProcess() override;
 	
 };
 #endif // EXTERNALMEMORYMANAGER_HPP

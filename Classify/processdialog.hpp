@@ -18,12 +18,11 @@ public:
 
 private:
 	void initializeObjects();
-	void initializeLayouts();
-	void initializeControls();
-	void initializeModels();
-	void initializeConnects();
 
-	void prepareLayout();
+	void prepareLayouts();
+	void prepareControls();
+	void prepareModels();
+	void prepareConnects();
 
 private slots:
 	void onRefreshButtonReleased();
@@ -34,8 +33,8 @@ private slots:
 private:
 	//Models
 	QStandardItemModel		*_listModel;
-	QSortFilterProxyModel	*_proxyModel;
-	QItemSelectionModel		*_selectionModel;
+	QSortFilterProxyModel	*_processListViewProxyModel;
+	QItemSelectionModel		*_processListViewSelectionModel;
 
 	//Layouts
 	QVBoxLayout				*_mainLayout;

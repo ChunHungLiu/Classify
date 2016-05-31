@@ -13,12 +13,11 @@ public:
 
 private:
 	void initializeObjects();
-	void initializeLayouts();
-	void initializeControls();
-	void initializeModels();
-	void initializeConnects();
 
-	void prepareLayout();
+	void prepareLayouts();
+	void prepareControls();
+	void prepareModels();
+	void prepareConnects();
 
 private slots:
 	void onSaveAction();
@@ -36,43 +35,54 @@ private slots:
 	void onUndoAction();
 
 private:
-	QList<QString>	_filters;
+	QList<QString>		_filters;
 
 	//Toolbars
-	QToolBar		*_mainToolBar;
-	QToolBar		*_dataTypesToolBar;
+	QToolBar			*_mainToolBar;
+	QToolBar			*_dataTypesToolBar;
 
 	//Menus
-	QMenuBar		*_menuBar;
-	QMenu			*_fileMenu;
-	QMenu			*_toolMenu;
-	QMenu			*_helpMenu;
+	QMenuBar			*_menuBar;
+	QMenu				*_fileMenu;
+	QMenu				*_toolMenu;
+	QMenu				*_helpMenu;
 
 	//Toolbar Actions
-	QAction			*_undoAction;
-	QAction			*_createNamespaceAction;
-	QAction			*_createClassAction;
-	QList<QAction*> _dataTypeActionList;
+	QAction				*_undoAction;
+	QAction				*_createNamespaceAction;
+	QAction				*_createClassAction;
+	QList<QAction*>		_dataTypeActionList;
 	
 	//Menu Actions
-	QAction			*_selectProcessAction;
-	QAction			*_newProjectAction;
-	QAction			*_openProjectAction;
-	QAction			*_importAction;
-	QAction			*_saveAction;
-	QAction			*_saveAsAction;
-	QAction			*_quitAction;
+	QAction				*_selectProcessAction;
+	QAction				*_newProjectAction;
+	QAction				*_openProjectAction;
+	QAction				*_importAction;
+	QAction				*_saveAction;
+	QAction				*_saveAsAction;
+	QAction				*_quitAction;
 
-	QAction			*_optionsAction;
+	QAction				*_optionsAction;
 
-	QAction			*_checkUpdatesAction;
-	QAction			*_aboutAction;
+	QAction				*_checkUpdatesAction;
+	QAction				*_aboutAction;
+
+	//Controls
+	QDockWidget			*_projectDockWidget;
+	QTreeView			*_projectTreeView;
+	QTreeView			*_memoryTreeView;
+
+	//Models
+	QStandardItemModel	*_projectTreeViewModel;
+	QItemSelectionModel	*_projectTreeViewSelectionModel;
+	MemoryTreeViewModel	*_memoryTreeViewModel;
 
 	//Dialogs
-	ProcessDialog	*_processDialog;
+	ProcessDialog		*_processDialog;
 
-	//Others
-	HANDLE			_hSelectedProcess;
+	//Memory mananger
+	MemoryManager		*_memoryManager;
+
 };
 
 #endif // MAINWINDOW_HPP
