@@ -1,0 +1,42 @@
+<RCC>
+    <qresource prefix="/">
+        <file alias="Refresh">Resources/Refresh.png</file>
+        <file alias="About">Resources/About.png</file>
+        <file alias="NewProject">Resources/Add File.png</file>
+        <file alias="CheckUpdates">Resources/Available Updates.png</file>
+        <file alias="Quit">Resources/Close Window.png</file>
+        <file>Resources/Code.png</file>
+        <file>Resources/Downloading Updates.png</file>
+        <file alias="Import">Resources/Import.png</file>
+        <file>Resources/Installing Updates.png</file>
+        <file alias="ModuleIcon">Resources/Memory Slot.png</file>
+        <file alias="Ok">Resources/Ok.png</file>
+        <file alias="OpenProject">Resources/Open Folder.png</file>
+        <file alias="Redo">Resources/Redo.png</file>
+        <file alias="Save">Resources/Save.png</file>
+        <file alias="Options">Resources/Settings.png</file>
+        <file alias="CreateNamespace">Resources/Source Code.png</file>
+        <file alias="SelectProcess">Resources/System Task.png</file>
+        <file alias="CreateClass">Resources/Tree Structure.png</file>
+        <file alias="Undo">Resources/Undo.png</file>
+        <file>Resources/X64.png</file>
+        <file>Resources/X86.png</file>
+        <file alias="DataTypes/Bool">Resources/DataTypes/Bool.png</file>
+        <file alias="DataTypes/Double">Resources/DataTypes/Double.png</file>
+        <file alias="DataTypes/Float">Resources/DataTypes/Float.png</file>
+        <file alias="DataTypes/Hex8">Resources/DataTypes/H8.png</file>
+        <file alias="DataTypes/Hex16">Resources/DataTypes/H16.png</file>
+        <file alias="DataTypes/Hex32">Resources/DataTypes/H32.png</file>
+        <file alias="DataTypes/Hex64">Resources/DataTypes/H64.png</file>
+        <file alias="DataTypes/Int8">Resources/DataTypes/Int8.png</file>
+        <file alias="DataTypes/Int16">Resources/DataTypes/Int16.png</file>
+        <file alias="DataTypes/Int32">Resources/DataTypes/Int32.png</file>
+        <file alias="DataTypes/Int64">Resources/DataTypes/Int64.png</file>
+        <file alias="DataTypes/UInt8">Resources/DataTypes/UInt8.png</file>
+        <file alias="DataTypes/UInt16">Resources/DataTypes/UInt16.png</file>
+        <file alias="DataTypes/UInt32">Resources/DataTypes/UInt32.png</file>
+        <file alias="DataTypes/UInt64">Resources/DataTypes/UInt64.png</file>
+        <file alias="DataTypes/Vec2">Resources/DataTypes/Vec2.png</file>
+        <file alias="DataTypes/Vec3">Resources/DataTypes/Vec3.png</file>
+    </qresource>
+</RCC>

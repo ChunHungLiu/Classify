@@ -26,3 +26,16 @@
 *.exe
 *.out
 *.app
+
+#MSVC Database
+*.VC.db
+
+#PCH
+ipch
+
+#Build
+Win32
+x64
+Classify/Debug
+Classify/x64
+Classify/GeneratedFiles
