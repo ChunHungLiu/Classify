@@ -1,0 +1,8 @@
+#Builds
+x64
+Win32
+Debug
+Release
+
+#QT stuff
+GeneratedFiles

@@ -1,0 +1,5 @@
+#ifndef PLUGINENTRY_HPP
+#define PLUGINENTRY_HPP
+
+
+#endif // PLUGINENTRY_HPP

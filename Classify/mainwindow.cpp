@@ -3,11 +3,35 @@
 #include "aboutdialog.hpp"
 #include "processdialog.hpp"
 
-#include "externalmemorymanager.hpp"
-#include "memorytreeviewmodel.hpp"
+#include "memorymanagerinterface.hpp"
+
+MemoryView::MemoryView(MainWindow *parent) : QObject(parent) {
+	view = new QTreeView(parent);
+	viewModel = new QStandardItemModel(parent);
+	selectionModel = view->selectionModel();
+
+	viewModel->setColumnCount(0);
+
+	QStringList headers;
+	headers << "Address" << "Name" << "Data" << "Hex8" << "Hex16" << "Hex32";
+	if (processorArch == 64)
+		headers << "Hex64";
+	headers << "Comment";
+
+	viewModel->setHorizontalHeaderLabels(headers);
+	view->setModel(viewModel);
+
+	view->header()->hide();
+
+	connect(selectionModel, &QItemSelectionModel::selectionChanged, parent, &MainWindow::onClassSelected);
+}
+
+//////////////////////////////////////////////////////////////////////////
 
 MainWindow::MainWindow(QWidget *parent)
-	: QMainWindow(parent) {
+	: QMainWindow(parent), _disabledControls(false) {
+
+	initializePlugins();
 
 	initializeObjects();
 
@@ -16,16 +40,35 @@ MainWindow::MainWindow(QWidget *parent)
 	prepareModels();
 	prepareConnects();
 
+	disableControls();
+
 	//Setup
 	addToolBar(Qt::RightToolBarArea, _dataTypesToolBar);
 	statusBar()->showMessage(tr("Ready"));
 	_filters.push_back("Classif Project (*.clp)");
 	_filters.push_back("All files (*.*)");
+}
+
+void MainWindow::initializePlugins() {
+	QDir pluginDir;
+	pluginDir.setPath(QApplication::instance()->applicationDirPath() + QDir::separator() + "Plugins");
+	pluginDir.setNameFilters({ "*.dll" });
+	pluginDir.setFilter(QDir::Files | QDir::NoDotAndDotDot | QDir::NoSymLinks);
+
+	for (QFile file : pluginDir.entryList()) {
+		QPluginLoader plugin;
+		plugin.setFileName(file.fileName());
+		if (!plugin.load()) {
+			QMessageBox::warning(this, tr("Plugin Manager"), tr("Can't load a plugin %1").arg(file.fileName()));
+			continue;
+		}
+		_plugins.push_back(plugin);
+	}
+
 
 }
 
 void MainWindow::initializeObjects() {
-	_memoryManager = new ExternalMemoryManager(this);
 	_processDialog = new ProcessDialog(this);
 
 	_dataTypesToolBar = new QToolBar(tr("Data Types Toolbar"), this);
@@ -34,8 +77,7 @@ void MainWindow::initializeObjects() {
 	_projectTreeView = new QTreeView(_projectDockWidget);
 	_projectTreeViewModel = new QStandardItemModel(this);
 
-	_memoryTreeView = new QTreeView(this);
-	_memoryTreeViewModel = new MemoryTreeViewModel(this);
+	_currentMemoryView = Q_NULLPTR;
 
 	_mainToolBar = addToolBar(tr("Main Toolbar"));
 	_menuBar = menuBar();
@@ -63,7 +105,7 @@ void MainWindow::initializeObjects() {
 }
 
 void MainWindow::prepareLayouts() {
-	setCentralWidget(_memoryTreeView);
+	//setCentralWidget(_memoryTreeView);
 
 	addDockWidget(Qt::LeftDockWidgetArea, _projectDockWidget);
 }
@@ -80,7 +122,7 @@ void MainWindow::prepareControls() {
 
 	QList<QString> dataTypes = { "HEX", "UINT", "INT" };
 	for (auto& type : dataTypes) {
-		for (int h = 8; h <= 64; h *= 2) {
+		for (int h = 8; h <= processorArch; h *= 2) {
 			QString text, resName;
 
 			text = QString("%1%2").arg(type, QString::number(h));
@@ -90,6 +132,7 @@ void MainWindow::prepareControls() {
 				resName[1] = resName[1].toUpper();
 
 			QAction *currentAction = new QAction(QIcon(QString(":/DataTypes/%1").arg(resName)), text, _dataTypesToolBar);
+			currentAction->setObjectName(text);
 			_dataTypesToolBar->addAction(currentAction);
 			_dataTypeActionList.push_back(currentAction);
 		}
@@ -107,6 +150,7 @@ void MainWindow::prepareControls() {
 		resName[0] = resName[0].toUpper();
 
 		QAction *currentAction = new QAction(QIcon(QString(":/DataTypes/%1").arg(resName)), type, _dataTypesToolBar);
+		currentAction->setObjectName(type);
 		_dataTypesToolBar->addAction(currentAction);
 		_dataTypeActionList.push_back(currentAction);
 	}
@@ -132,14 +176,12 @@ void MainWindow::prepareControls() {
 }
 
 void MainWindow::prepareModels() {
-	_projectTreeViewModel->setColumnCount(1);
+	_projectTreeViewModel->setColumnCount(0);
 	_projectTreeViewModel->setHorizontalHeaderLabels({ "Object name" });
 
 	_projectTreeView->setModel(_projectTreeViewModel);
-	_projectTreeViewSelectionModel = _projectTreeView->selectionModel();
 
-	//test
-	_projectTreeViewModel->invisibleRootItem()->appendRow(new QStandardItem(QIcon(":/CreateClass"), tr("Test")));
+	_projectTreeViewSelectionModel = _projectTreeView->selectionModel();
 }
 
 void MainWindow::prepareConnects() {
@@ -160,9 +202,91 @@ void MainWindow::prepareConnects() {
 	connect(_aboutAction, &QAction::triggered, this, &MainWindow::onAboutAction);
 }
 
+void MainWindow::enableControls() {
+	if (!_disabledControls)
+		return;
+
+	for (QAction *action : _dataTypeActionList)
+		action->setDisabled(false);
+
+	_saveAction->setDisabled(false);
+	_saveAsAction->setDisabled(false);
+	_undoAction->setDisabled(false);
+	_createNamespaceAction->setDisabled(false);
+	_createClassAction->setDisabled(false);
+
+	_disabledControls = false;
+}
+
+void MainWindow::disableControls() {
+	if (_disabledControls)
+		return;
+
+	for (QAction *action : _dataTypeActionList)
+		action->setDisabled(true);
+
+	_saveAction->setDisabled(true);
+	_saveAsAction->setDisabled(true);
+	_undoAction->setDisabled(true);
+	_createNamespaceAction->setDisabled(true);
+	_createClassAction->setDisabled(true);
+
+	_disabledControls = true;
+}
+
+void MainWindow::onClassSelected(const QItemSelection &selected, const QItemSelection &deselected) {
+}
+
 void MainWindow::onAboutAction() {
 	AboutDialog about(this);
 	about.exec();
+}
+
+void MainWindow::addRowToMemoryTree(const QAction *from, quintptr address, quint8 size) {
+	if (_currentMemoryView == Q_NULLPTR)
+		return;
+
+	unsigned char *binaryData = new unsigned char[size];
+	QStandardItem *item = Q_NULLPTR;
+	QList<QStandardItem*> columns;
+
+	memset(binaryData, 0xFF, size);
+
+	//_processManager->read(address, binaryData, size);
+	
+	item = new QStandardItem(from->icon(), tr("0x%1").arg(address, 8, 16, QChar('0')));
+	item->setForeground(QBrush(QColor("red")));
+	columns.push_back(item);
+
+	item = new QStandardItem("unknown");
+	item->setForeground(QBrush(QColor("orange")));
+	columns.push_back(item);
+
+	item = new QStandardItem("unknown");
+	item->setForeground(QBrush(QColor("blue")));
+	columns.push_back(item);
+
+	for (quint64 i = 0; i < sizeof(binaryData); ++i) {
+		//TODO: Add color
+		columns.push_back(new QStandardItem(QString("%1").arg(binaryData[i], 2, 16).toUpper()));
+	}
+		
+	item = new QStandardItem("//");
+	item->setForeground(QBrush(QColor("green")));
+	columns.push_back(item);
+
+	_currentMemoryView->viewModel->invisibleRootItem()->appendRow(columns);
+
+	for (int i = 0; i < _currentMemoryView->view->header()->count(); ++i)
+		_currentMemoryView->view->resizeColumnToContents(i);
+
+	delete[] binaryData;
+}
+
+void MainWindow::createWatcher(QList<QStandardItem>& row) {
+	/*QFuture<bool> future = QtConcurrent::run([](QList<QStandardItem> row) {
+		return true;
+	});*/
 }
 
 void MainWindow::onSelectProcessAction() {
@@ -171,12 +295,12 @@ void MainWindow::onSelectProcessAction() {
 
 	const Process proc = _processDialog->getSelectedProcess();
 
-	if (!_memoryManager->openProcess(proc.id)) {
+	if (!_processManager->open(proc.id)) {
 		QMessageBox::warning(this, tr("Application"), tr("Can't open handle to process %1").arg(proc.name));
 		return;
 	}
 
-	setWindowTitle(tr("Classify - %1").arg(proc.name));
+	setWindowTitle(tr("Classify - %1 - %2").arg(QString::number(proc.id), proc.name));
 }
 
 void MainWindow::onUndoAction() {
@@ -192,10 +316,38 @@ void MainWindow::onSaveAsAction() {
 }
 
 void MainWindow::onConvertAction() {
-	auto *_pSender = sender();
+	QObject *currentSender = sender();
 
-	if (_pSender == Q_NULLPTR)
+	if (currentSender == Q_NULLPTR)
 		return;
+
+	QString currentSenderName = currentSender->objectName();
+	bool converted = false;
+	quint32 value = 0;
+
+	if (currentSenderName.startsWith("HEX")) {
+		value = currentSenderName.replace("HEX", "").toInt(&converted);
+	} else if (currentSenderName.startsWith("UINT")) {
+		value = currentSenderName.replace("UINT", "").toInt(&converted);
+	} else if (currentSenderName.startsWith("INT")) {
+		value = currentSenderName.replace("INT", "").toInt(&converted);
+	} else if (currentSenderName == "BOOL") {
+		value = 1;
+		converted = true;
+	} else if (currentSenderName == "FLOAT") {
+		value = 4;
+		converted = true;
+	} else if (currentSenderName == "DOUBLE") {
+		value = 4;
+		converted = true;
+	} else {
+		converted = false;
+	}
+
+	if (!converted)
+		return;
+
+	addRowToMemoryTree((QAction*)currentSender, _processManager->base(), value);
 }
 
 void MainWindow::onCheckUpdatesAction() {
@@ -212,9 +364,14 @@ void MainWindow::onCreateClassAction() {
 		node = _projectTreeViewModel->itemFromIndex(_projectTreeViewSelectionModel->currentIndex());
 
 	node->appendRow(item);
+
+	_memoryList.push_back(MemoryView(this));
+	_currentMemoryView = &_memoryList.last();
+	setCentralWidget(_currentMemoryView->view);
 }
 
 void MainWindow::onOpenProjectAction() {
+	enableControls();
 }
 
 void MainWindow::onOptionsAction() {
@@ -222,10 +379,11 @@ void MainWindow::onOptionsAction() {
 }
 
 void MainWindow::onNewProjectAction() {
+	enableControls();
 }
 
 void MainWindow::onImportAction() {
-
+	enableControls();
 }
 
 void MainWindow::onCreateNamespaceAction() {

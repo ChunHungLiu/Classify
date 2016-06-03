@@ -132,6 +132,8 @@ void ProcessDialog::onRefreshButtonReleased() {
 	#endif
 
 	_listModel->clear();
+	_processListViewProxyModel->clear();
+
 	_processListView->setIconSize({ 32, 32 });
 
 	for (const Process& process : _processList) {
@@ -156,7 +158,7 @@ void ProcessDialog::onOpenProcessReleased() {
 		return;
 
 	auto proc = std::find_if(_processList.cbegin(), _processList.cend(), [=](const Process& p) {
-		return p.name.compare(_processListViewSelectionModel->selectedRows().first().data().toString(), Qt::CaseInsensitive); 
+		return p.name.compare(_processListViewSelectionModel->selectedRows().first().data().toString(), Qt::CaseInsensitive) == 0; 
 	});
 	Q_ASSERT(proc != Q_NULLPTR);
 

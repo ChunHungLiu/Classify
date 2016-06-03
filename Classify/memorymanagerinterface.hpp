@@ -1,18 +1,20 @@
-#pragma once
+#ifndef MEMORYMANAGERINTERFACE_HPP
+#define MEMORYMANAGERINTERFACE_HPP
 
 #include <memory>
 #include <type_traits>
 
-class MemoryManager {
-	friend class InternalMemoryManager;
-	friend class ExternalMemoryManager;
-
-	virtual void closeProcess() = 0;
+class MemoryManagerInterface {
 public:
 	//Virtuals
-	virtual bool openProcess(quint64 id) = 0;
+	virtual ~MemoryManagerInterface() {}
+	virtual bool open(quint64 id) = 0;
+	virtual const quint64& processId() = 0;
+	virtual const quintptr base(const QString& moduleName = "") = 0;
+	virtual const quint64 size(const QString& moduleName = "") = 0;
 	virtual void read(const quintptr address, void* buffer, size_t size) = 0;
 	virtual void write(quintptr address, const void* buffer, size_t size) = 0;
+	virtual void close() = 0;
 
 	//Templates
 	template<typename T>
@@ -68,3 +70,7 @@ public:
 		write(address, &objects, sizeof(objects));
 	}
 };
+
+Q_DECLARE_INTERFACE(MemoryManagerInterface, "org.theaifam5.Classify.MemoryManagerInterface")
+
+#endif // MEMORYMANAGERINTERFACE_HPP

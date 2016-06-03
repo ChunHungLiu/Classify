@@ -1,44 +1,15 @@
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-
-# Fortran module files
-*.mod
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
-
-# Executables
-*.exe
-*.out
-*.app
+#Visual Studio
+.vs
 
 #MSVC Database
-*.db
-
-#PCH
-ipch
+*.VC.opendb
+*.VC.db
 
 #Build
-Win32
 x64
-Classify/Debug
-Classify/x64
-Classify/GeneratedFiles
+Win32
+Debug
+Release
 
-#Visual Studio configuration
-.vs
+#Precompiled Header
+ipch

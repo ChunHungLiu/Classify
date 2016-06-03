@@ -1,0 +1,10 @@
+#ifndef GLOBALS_HPP
+#define GLOBALS_HPP
+
+#ifdef PLUGIN_LIB
+# define PLUGIN_EXPORT Q_DECL_EXPORT
+#else
+# define PLUGIN_EXPORT Q_DECL_IMPORT
+#endif
+
+#endif // GLOBALS_HPP
